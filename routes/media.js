@@ -1,9 +1,9 @@
 var express = require("express");
 var router = express.Router();
 
+const mediaController = require("../app/controllers/MediaController");
+
 /* GET media listing. */
-router.get("/", function (req, res, next) {
-    res.send("respond with a resource");
-});
+router.post("/", mediaController.store);
 
 module.exports = router;
