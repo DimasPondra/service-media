@@ -25,6 +25,7 @@ const mediaController = require("../app/controllers/MediaController");
 const validationStore = require("../app/validators/StoreMediaValidator");
 
 /* GET media listing. */
+router.get("/", mediaController.index);
 router.post("/", upload.array("files"), validationStore, mediaController.store);
 
 module.exports = router;

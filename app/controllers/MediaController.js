@@ -6,6 +6,26 @@ const Media = require("../models/Media");
 const { validationResult } = require("express-validator");
 
 const MediaController = {
+    index: async (req, res) => {
+        const medias = await Media.findAll({
+            attributes: ["id", "name", "location"],
+        });
+
+        const data = await Promise.all(
+            medias.map(async (media) => {
+                return {
+                    id: media.id,
+                    url: APP_URL + "/uploads/" + media.location + "/" + media.name,
+                };
+            })
+        );
+
+        return res.json({
+            status: "success",
+            message: "Successfully load data.",
+            data: data,
+        });
+    },
     store: async (req, res) => {
         try {
             let files = req.files;
