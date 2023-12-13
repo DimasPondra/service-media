@@ -27,5 +27,6 @@ const validationStore = require("../app/validators/StoreMediaValidator");
 /* GET media listing. */
 router.get("/", mediaController.index);
 router.post("/", upload.array("files"), validationStore, mediaController.store);
+router.delete("/:id", mediaController.delete);
 
 module.exports = router;

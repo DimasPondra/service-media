@@ -113,6 +113,42 @@ const MediaController = {
             });
         }
     },
+    delete: async (req, res) => {
+        try {
+            const media = await Media.findByPk(req.params.id);
+
+            if (!media) {
+                return res.status(404).json({
+                    status: "error",
+                    message: "Media not found.",
+                });
+            }
+
+            const targetPath = path.join(__dirname, `../../public/uploads/${media.location}/${media.name}`);
+            fs.unlink(targetPath, (err) => {
+                if (err) {
+                    return res.status(500).json({
+                        status: "error",
+                        message: "Something went wrong.",
+                        errors: err.message,
+                    });
+                }
+            });
+
+            await media.destroy();
+
+            return res.json({
+                status: "success",
+                message: "Media successfully deleted.",
+            });
+        } catch (err) {
+            return res.status(500).json({
+                status: "error",
+                message: "Something went wrong.",
+                errors: err.message,
+            });
+        }
+    },
 };
 
 module.exports = MediaController;
