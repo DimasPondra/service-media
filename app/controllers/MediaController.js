@@ -1,15 +1,95 @@
+require("dotenv").config();
+const { APP_URL } = process.env;
+const fs = require("fs");
+const path = require("path");
+const Media = require("../models/Media");
+const { validationResult } = require("express-validator");
+
 const MediaController = {
     store: async (req, res) => {
         try {
-            res.json({
+            let files = req.files;
+
+            // Check files
+            if (files == undefined || files.length == 0) {
+                return res.status(422).json({
+                    status: "error",
+                    message: "Unprocessable Entity.",
+                    errors: [
+                        {
+                            message: "Files is required.",
+                        },
+                    ],
+                });
+            }
+
+            let { directory } = req.body;
+
+            // Check validation (body: directory)
+            const errors = validationResult(req);
+            const errorMessage = await Promise.all(
+                errors.array().map(async (err) => {
+                    return {
+                        message: err.msg,
+                    };
+                })
+            );
+            if (!errors.isEmpty()) {
+                // Remove files in temp because the directory is not defined
+                if (files.length != 0) {
+                    await Promise.all(
+                        files.map(async (file) => {
+                            fs.unlink(file.path, (err) => {
+                                if (err) {
+                                    return res.status(500).json({
+                                        status: "error",
+                                        message: "Something went wrong.",
+                                        errors: err.message,
+                                    });
+                                }
+                            });
+                        })
+                    );
+                }
+
+                return res.status(422).json({
+                    status: "error",
+                    message: "Unprocessable Entity.",
+                    errors: errorMessage,
+                });
+            }
+
+            const dynamicDirectoryPath = path.join(__dirname, `../../public/uploads/${directory}`);
+            fs.mkdirSync(dynamicDirectoryPath, { recursive: true });
+
+            const data = await Promise.all(
+                files.map(async (file) => {
+                    // Move file from temp to dynamic directory
+                    const sourcePath = file.path;
+                    const targetPath = path.join(dynamicDirectoryPath, file.filename);
+
+                    fs.renameSync(sourcePath, targetPath);
+
+                    // Save data
+                    let media = await Media.create({ name: file.filename, location: directory });
+
+                    return {
+                        id: media.id,
+                        url: APP_URL + "/uploads/" + media.location + "/" + media.name,
+                    };
+                })
+            );
+
+            return res.json({
                 status: "success",
-                message: "successfully upload file.",
+                message: "Successfully upload file.",
+                data: data,
             });
-        } catch (error) {
-            res.status(500).json({
+        } catch (err) {
+            return res.status(500).json({
                 status: "error",
-                message: "something went wrong.",
-                errors: error,
+                message: "Something went wrong.",
+                errors: err.message,
             });
         }
     },

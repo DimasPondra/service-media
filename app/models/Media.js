@@ -1,5 +1,5 @@
-const { Sequelize, DataTypes } = require("sequelize");
-const sequelize = new Sequelize();
+const { DataTypes } = require("sequelize");
+const sequelize = require("../sequelize");
 
 const Media = sequelize.define("Media", {
     id: {
