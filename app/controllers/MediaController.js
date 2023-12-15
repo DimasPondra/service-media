@@ -113,6 +113,22 @@ const MediaController = {
             });
         }
     },
+    show: async (req, res) => {
+        const media = await Media.findByPk(req.params.id);
+
+        if (!media) {
+            return res.status(404).json({
+                status: "error",
+                message: "Media not found.",
+            });
+        }
+
+        return res.json({
+            status: "success",
+            message: "Successfully get data.",
+            data: media,
+        });
+    },
     delete: async (req, res) => {
         try {
             const media = await Media.findByPk(req.params.id);
