@@ -123,10 +123,15 @@ const MediaController = {
             });
         }
 
+        const url = APP_URL + "/uploads/" + media.location + "/" + media.name;
+
         return res.json({
             status: "success",
             message: "Successfully get data.",
-            data: media,
+            data: {
+                id: media.id,
+                url: url,
+            },
         });
     },
     delete: async (req, res) => {
