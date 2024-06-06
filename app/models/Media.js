@@ -26,6 +26,8 @@ const Media = sequelize.define("Media", {
         allowNull: false,
         field: "updated_at",
     },
+}, {
+    tableName: 'media'
 });
 
 module.exports = Media;
